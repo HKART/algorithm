@@ -92,6 +92,131 @@ void printMiddle(struct Node **head_ref) {
     printf("Middle %d\n\r",slow->data);
 }
 
+void swapNodes(struct Node **head_ref, int x, int y) {
+    struct Node *currentX,*privX,*currentY,*privY;
+    struct Node *x_node, *y_node;
+    currentX = currentY = *head_ref;
+    privX = privY = NULL;
+    if(x == y)
+        return;
+    while(currentX && currentX->data != x){
+        privX = currentX;
+        currentX = currentX->next;
+    }
+    if(currentX == NULL)
+        return;
+    while(currentY && currentY->data != y) {
+        privY = currentY;
+        currentY = currentY->next;
+    }
+    if(currentY == NULL)
+        return;
+    
+    if(privX) {
+        privX->next = currentX->next;
+    }
+    if(privY) {
+        privY->next = currentY->next;
+    }
+    if(privX==NULL) {
+        privX = currentX->next;
+        *head_ref = privX;
+    }
+    if(privY == NULL) {
+        privY = currentY->next;
+        *head_ref = privY;
+    }
+    currentX->next = NULL;
+    currentY->next = NULL;
+
+    if (privX && privX != *head_ref) {
+        currentY->next = privX->next;
+        privX->next = currentY;
+    }
+    if(privY && privY != *head_ref) {
+        currentX->next = privY->next;
+        privY->next = currentX;
+    }
+    if(privX == *head_ref) {
+        currentY->next = privX;
+        *head_ref = currentY;
+    }
+    else if(privY == *head_ref) {
+        currentX->next = privY;
+        *head_ref = currentX;
+    }
+}
+
+int compareList(struct Node *a, struct Node *b) {
+    if (a == NULL && b == NULL) return 1;
+    if(a == NULL || b == NULL) return 0;
+    if(a->data == b->data && compareList(a->next,b->next))
+        return 1;
+    else
+        return 0;
+}
+
+void checkPalindrome(struct Node **head_ref) {
+    struct Node *head = *head_ref;
+    struct Node *middle,*slow_ptr, *fast_ptr, *priv_slow_ptr;
+    slow_ptr = fast_ptr = *head_ref;
+    middle = NULL;
+
+    while (fast_ptr && fast_ptr->next) {
+        priv_slow_ptr = slow_ptr;
+        fast_ptr = fast_ptr->next->next;
+        slow_ptr = slow_ptr->next;
+    }
+
+    if(fast_ptr != NULL) {
+        middle = slow_ptr;
+        slow_ptr = slow_ptr->next;
+    }
+    priv_slow_ptr->next = NULL;
+    reverseList(&slow_ptr);
+
+    int ret = compareList(head,slow_ptr);
+
+    printf("Ret val %d\n\r",ret);
+    reverseList(&slow_ptr);
+    if(middle) {
+        priv_slow_ptr->next = middle;
+        middle->next = slow_ptr;
+    }
+    else {
+        priv_slow_ptr->next = slow_ptr;
+    }
+    printList(head); 
+}
+
+void skipMdeleteN(struct Node  *head, int M, int N)
+{
+    struct Node *curr = head, *t;
+    int count;
+
+    while (curr)
+    {
+        for (count = 1; count<M && curr!= NULL; count++)
+            curr = curr->next;
+
+
+        if (curr == NULL)
+            return;
+
+
+        t = curr->next;
+        for (count = 1; count<=N && t!= NULL; count++)
+        {
+            struct Node *temp = t;
+            t = t->next;
+            free(temp);
+        }
+        curr->next = t; // Link the previous list with remaining nodes
+
+
+        curr = t;
+    }
+}
 
 int main()
 {
@@ -99,8 +224,11 @@ int main()
     push(&p, 3);
     push(&p, 2);
     push(&p, 1);
+    push(&p, 2);
+    push(&p, 3);
     printf("First Linked List:\n");
     printList(p);
+    checkPalindrome(&p);
 
     push(&q, 8);
     push(&q, 7);
@@ -111,6 +239,8 @@ int main()
     printList(q);
     struct Node *res = mergeSorted(p,q);
     printList(res);
+    swapNodes(&res,1,7);
+    printList(res);
 
     reverseList(&res);
     printList(res);
@@ -118,4 +248,6 @@ int main()
     rotateList(&res, 4);
     printList(res);
     printMiddle(&res);
+    skipMdeleteN(res,2,2);
+    printList(res);
 }

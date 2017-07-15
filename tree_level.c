@@ -57,6 +57,56 @@ int height(struct node* node)
         else return(rheight+1);
     }
 }
+
+int size_tree(struct node* node) {
+    if(node == NULL)return 0;
+    int lsize = size_tree(node->left);
+    int rsize = size_tree(node->right);
+    return lsize+1+rsize;
+}
+
+void root_to_leaf(struct node *node,int path[],int len) {
+    if(node == NULL)return;
+    path[len++] = node->data;
+    if(node->left == NULL && node->right == NULL) {
+        int i = 0;
+        for (;i<len;++i) {
+            printf("%d ",path[i]);
+        }
+        printf("\n\r");
+    }
+    else {
+        root_to_leaf(node->left,path,len);
+        root_to_leaf(node->right,path,len);
+    }
+}
+
+void print_ancestor(struct node *node, int key, int path[],int len) {
+    if(node == NULL) return;
+    path[len++] = node->data;
+    if(node->data == key) {
+        int i = 0;
+        for (;i<len;++i) {
+            printf("%d ",path[i]);
+        }
+    }
+    else {
+        print_ancestor(node->left,key,path,len);
+        print_ancestor(node->right,key,path,len);
+    }
+}
+
+struct node *findLCA(struct node *root,int n1,int n2) {
+    if (root == NULL) return NULL;
+    if(root->data == n1 || root->data == n2) return root;
+
+    struct node *llca = findLCA(root->left,n1,n2);
+    struct node *rlca = findLCA(root->right,n1,n2);
+    if(llca && rlca) return root;
+    if(llca == NULL) return rlca;
+    else return llca;
+}
+
  
 /* Helper function that allocates a new node with the
    given data and NULL left and right pointers. */
@@ -82,6 +132,13 @@ int main()
  
     printf("Level Order traversal of binary tree is \n");
     printLevelOrder(root);
- 
+
+    printf("Size %d\n\r",size_tree(root));
+    int path[50];
+    int len = 0;
+    root_to_leaf(root,path,len);
+    print_ancestor(root,5,path,len); 
+    struct node *res = findLCA(root,4,5);
+    printf("lca %d\n\r",res->data);
     return 0;
 }
