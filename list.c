@@ -30,6 +30,46 @@ void printList(struct Node *head)
     printf("\n");
 }
 
+void deletealter(struct Node **head_ref, int m, int n) {
+    if(head_ref == NULL) return;
+    struct Node *curr = *head_ref;
+    struct Node *t = NULL;
+    while (curr) {
+        int i;
+        for (i = 1; i< m && curr != NULL; ++i)
+            curr = curr->next;
+        if(NULL == curr) return;
+        t = curr->next;
+        for (i = 1; i<=n; ++i) {
+            struct Node *tmp = t;
+            t = t->next;
+            free(tmp);
+        }
+
+        curr->next = t;
+        curr = t;
+    }
+}
+
+void rotateList_(struct Node **head_ref, int k) {
+    if(NULL == head_ref) return;
+    struct Node *tmp = *head_ref;
+    int i = 1;
+    for (i = 1; i< k && tmp; i++)
+        tmp = tmp->next;
+    if(!tmp) return;
+    struct Node *t = tmp->next;
+    struct Node *c_head = tmp->next;
+    tmp->next = NULL;
+
+    while(t->next)
+        t = t->next;
+    t->next = *head_ref;
+    *head_ref = c_head;
+}
+
+
+
 void reverseList (struct Node **head_ref) {
     struct Node *prev,*current,*next;
     prev = NULL;
@@ -43,6 +83,39 @@ void reverseList (struct Node **head_ref) {
     }
     *head_ref = prev;
 }
+
+struct Node *merge(struct Node *a , struct Node *b) {
+    if(a == NULL) return b;
+    if(b == NULL) return a;
+    struct Node *result;
+    struct Node *tmp;
+    if(a->data < b->data){
+        result = a;
+        a = a->next;
+    }else {
+        result = b;
+        b = b->next;
+    }
+    result->next = NULL;
+    tmp = result;
+    while(a && b) {
+        if(a->data < b->data) {
+            tmp->next = a;
+            a = a->next;
+            tmp = tmp->next;
+        }
+        else {
+            tmp->next = b;
+            b = b->next;
+            tmp = tmp->next;
+        }
+    }
+    if(!a) tmp->next = b;
+    else if(!b) tmp->next = a;
+
+    return result;
+}
+
 
 struct Node *mergeSorted(struct Node *a, struct Node *b) {
     struct Node *result;
@@ -218,6 +291,32 @@ void skipMdeleteN(struct Node  *head, int M, int N)
     }
 }
 
+/* deletes alternate nodes of a list starting with head */
+void deleteAlt(struct Node *head)
+{
+    if (head == NULL)
+        return;
+
+    /* Initialize prev and node to be deleted */
+    struct Node *prev = head;
+    struct Node *node = head->next;
+
+    while (prev != NULL && node != NULL)
+    {
+        /* Change next link of previous node */
+        prev->next = node->next;
+
+        /* Free memory */
+        free(node);
+
+        /* Update prev and node
+         * */
+        prev = prev->next;
+        if (prev != NULL)
+            node = prev->next;
+    }
+}
+
 int main()
 {
     struct Node *p = NULL, *q = NULL;
@@ -228,6 +327,7 @@ int main()
     push(&p, 3);
     printf("First Linked List:\n");
     printList(p);
+    deleteAlt(p);
     checkPalindrome(&p);
 
     push(&q, 8);
@@ -237,17 +337,19 @@ int main()
     push(&q, 4);
     printf("Second Linked List:\n");
     printList(q);
-    struct Node *res = mergeSorted(p,q);
+    struct Node *res = merge(p,q);
     printList(res);
     swapNodes(&res,1,7);
     printList(res);
 
     reverseList(&res);
     printList(res);
-
-    rotateList(&res, 4);
+    printf("rotate\n\r");
+    rotateList_(&res, 4);
     printList(res);
     printMiddle(&res);
     skipMdeleteN(res,2,2);
+    printList(res);
+    deletealter(&res,1,1);
     printList(res);
 }

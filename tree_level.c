@@ -37,7 +37,64 @@ void printGivenLevel(struct node* root, int level)
         printGivenLevel(root->right, level-1);
     }
 }
- 
+int areIdentical(struct node *t, struct node *s) {
+    if(t == NULL && s == NULL) 
+        return 1;
+    if(t == NULL || s == NULL)
+        return 0;
+    if(t->data == s->data && areIdentical(t->left,s->left)&& areIdentical(t->right,s->right))
+        return 1;
+    return 0;
+}
+
+int isSubtree(struct node *t ,struct node *s) {
+    if(s == NULL) return 1;
+    if(t == NULL) return 0;
+    if(areIdentical(t,s)) return 1;
+    return (isSubtree(t->left,s)||isSubtree(t->right,s));
+}
+int count_leaf(struct node *root) {
+    static int count = 0;
+    if (root == NULL) return 0;
+    if(root->left == NULL && root->right == NULL) count++;
+    count_leaf(root->left);
+    count_leaf(root->right);
+    return count;
+}
+#if 0
+void inorder_without_rec(struct node *root) {
+    struct node *current = root;
+    int done = 0;
+    while (!done) {
+        if(current != NULL) {
+            /* push current to stack */
+            current = current->left;
+        }
+        else {
+            {/*stack is not empty*/
+                /* pop from the stack */
+                printf ("%d\n\r",current->data);
+                current = current->right;
+            }
+            /* else */
+            {
+                done = 1;
+            }
+        }
+    }
+}
+struct node *buildTree (char in[], char pre[], int start, int end) {
+    if(start > end) return NULL;
+    static int idx = 0;
+    struct node *tnode = newNode(pre[idx++]);
+    if(start == end) return tnode;
+    int inidx = search (in,start,end,tnode->data);
+    tnode->left = buildTree(in,pre,start,inidx-1);
+    tnode->right = buildTree(in,pre,inidx+1,end);
+    return tnode;
+}
+#endif
+
 /* Compute the "height" of a tree -- the number of
     nodes along the longest path from the root node
     down to the farthest leaf node.*/
@@ -140,5 +197,7 @@ int main()
     print_ancestor(root,5,path,len); 
     struct node *res = findLCA(root,4,5);
     printf("lca %d\n\r",res->data);
+    int count  = count_leaf(root);
+    printf("count is %d\n\r",count);
     return 0;
 }
